@@ -5,7 +5,11 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import com.fasterxml.jackson.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import com.fasterxml.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class SimpleShell {
 
@@ -42,21 +46,23 @@ public class SimpleShell {
                 String specificCommand = "";
                 ArrayList<String> commandList = new ArrayList<>();
                 commandList.add(commandLine);
+                MessageController mesCont = new MessageController();
+                IdController idCont = new IdController();
+
 
                 if (commandLine.equalsIgnoreCase("ids")) {
                     System.out.println("To retrieve all registered github ids, press enter\nTo register a new id " +
                             "or change the name associated, type the name followed by the github id");
                     specificCommand = console.readLine();
                     if(specificCommand.equals("\n")) {
-                        //Jackson stuff
-                        String results = webber.get_ids();
+                        String results = idCont.get_ids(commandList);
                         SimpleShell.prettyPrint(results);
                         continue;
                     } else {
                         String [] c = specificCommand.split(" ");
                         commandList.addAll(Arrays.asList(c));
-                        //Jackson stuff
-                        webber.post_id();
+                        String save = idCont.saveId(commandList);
+                        SimpleShell.prettyPrint(save);
                     }
                 }
 
@@ -65,24 +71,42 @@ public class SimpleShell {
                             "To retrieve the last twenty messages sent to you enter your github id");
                     specificCommand = console.readLine();
                     if(specificCommand.equals("\n")) {
-                        //Jackson stuff
-                        String results = webber.get_messages();
+                        String results = mesCont.get_messages(commandList);
                         SimpleShell.prettyPrint(results);
                         continue;
                     } else {
                         commandList.add(specificCommand);
-                        //Jackson stuff
-                        String results = webber.get_messages();
+                        String results = mesCont.get_my_messages(commandList);
                         SimpleShell.prettyPrint(results);
                     }
                 }
 
-//pick up here
-                if(commandLine.equalsIgnoreCase("send")){
 
-                    //Jackson stuff
-                    webber.post_message_to_world();
+                if(commandLine.equalsIgnoreCase("send")){
+                    System.out.println("To send a message on the timeline type in 'your message' and your github id.\n" +
+                            "To send a message to a friend, type 'your message', within single quotes, followed by your github id and then the");
+                    specificCommand = console.readLine();
+                    Pattern pattern = Pattern.compile("'.+'");
+                    Matcher matcher = pattern.matcher(specificCommand);
+                    if(matcher.find()){
+                        String one = matcher.group();
+                        String two = specificCommand.substring(matcher.end());
+                        String[] twoSplit = two.split(" ");
+                        commandList.add(one);
+                        if(twoSplit.length == 1){
+                            commandList.add(twoSplit[0]);
+                            String results = mesCont.post_world(commandList);
+                            SimpleShell.prettyPrint(results);
+                        }
+                        if(twoSplit.length == 2){
+                            commandList.add(twoSplit[0]);
+                            commandList.add(twoSplit[1]);
+                            String results = mesCont.post_friend(commandList);
+                            SimpleShell.prettyPrint(results);
+                        }
+                    }
                 }
+
 
                 //print history, moved it here so full commands will be in history
                 userInputHistory.addAll(commandList);

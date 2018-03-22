@@ -9,19 +9,24 @@ public class Message {
     private String message;
 
     public Message(){
-        this.sequence = "-";
-        this.timestamp = "2018-03-21T01:00:00.0Z";
-        this.fromid = "";
-        this.toid = "";
-        this.message = "";
     }
 
-    public Message(String sequence, String timestamp, String fromid, String toid, String message) {
+    public Message(String sequence, String fromid, String toid, String message) {
         this.sequence = sequence;
-        timestamp = "2018-03-21T01:00:00.0Z";
-        this.timestamp = timestamp;
+        this.timestamp = "2018-03-22T01:00:00.0Z";
         this.fromid = fromid;
         this.toid = toid;
+        this.message = message;
+    }
+
+    public Message(String fromid, String toid, String message){
+        this.fromid = fromid;
+        this.toid = toid;
+        this.message = message;
+    }
+
+    public Message(String fromid, String message){
+        this.fromid = fromid;
         this.message = message;
     }
 
@@ -64,8 +69,11 @@ public class Message {
     public String getMessage() {
         return message;
     }
+
+    @Override
+    public String toString(){
+        return "sequence: " + getSequence() + ", timestamp: " + getTimestamp()+ ", from: " + getFromid() + ", to: " + getToid() + ", message: " + getMessage();
+    }
 }
 
 
-
-//timestamp:
