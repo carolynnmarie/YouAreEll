@@ -6,5 +6,8 @@ public class Id {
     private String name;
     private String githubId;
 
+    public Id(){
+
+    }
 
 }
