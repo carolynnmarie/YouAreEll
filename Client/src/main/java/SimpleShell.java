@@ -3,15 +3,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import com.fasterxml.jackson.*;
 
 public class SimpleShell {
 
 
     public static void prettyPrint(String output) {
-        // yep, make an effort to format things nicely, eh?
         System.out.println(output);
     }
+    
     public static void main(String[] args) throws java.io.IOException {
 
         YouAreEll webber = new YouAreEll();
@@ -19,86 +21,104 @@ public class SimpleShell {
         BufferedReader console = new BufferedReader
                 (new InputStreamReader(System.in));
 
-        ProcessBuilder pb = new ProcessBuilder();
-        List<String> history = new ArrayList<String>();
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        List<String> userInputHistory = new ArrayList<String>();
         int index = 0;
+
         //we break out with <ctrl c>
         while (true) {
-            //read what the user enters
-            System.out.println("cmd? ");
+            System.out.println("To receive all registered github ids, register a new id, or change the associated name, type 'ids'.\n" +
+                    "To get messages, type 'messages'. \nTo send a message, type 'send'.\n" +
+                    "To receive a history of previous commands, type 'history'.\n" +
+                    "To exit, type exit. ");
             commandLine = console.readLine();
-
-            //input parsed into array of strings(command and arguments)
-            String[] commands = commandLine.split(" ");
-            List<String> list = new ArrayList<String>();
-
-            //if the user entered a return, just loop again
-            if (commandLine.equals(""))
-                continue;
+            if (commandLine.equals("")) continue;
             if (commandLine.equals("exit")) {
-                System.out.println("bye!");
+                System.out.println("Goodbye");
                 break;
             }
 
-            //loop through to see if parsing worked
-            for (int i = 0; i < commands.length; i++) {
-                //System.out.println(commands[i]); //***check to see if parsing/split worked***
-                list.add(commands[i]);
-
-            }
-            System.out.print(list); //***check to see if list was added correctly***
-            history.addAll(list);
             try {
-                //display history of shell with index
-                if (list.get(list.size() - 1).equals("history")) {
-                    for (String s : history)
+                String specificCommand = "";
+                ArrayList<String> commandList = new ArrayList<>();
+                commandList.add(commandLine);
+
+                if (commandLine.equalsIgnoreCase("ids")) {
+                    System.out.println("To retrieve all registered github ids, press enter\nTo register a new id " +
+                            "or change the name associated, type the name followed by the github id");
+                    specificCommand = console.readLine();
+                    if(specificCommand.equals("\n")) {
+                        //Jackson stuff
+                        String results = webber.get_ids();
+                        SimpleShell.prettyPrint(results);
+                        continue;
+                    } else {
+                        String [] c = specificCommand.split(" ");
+                        commandList.addAll(Arrays.asList(c));
+                        //Jackson stuff
+                        webber.post_id();
+                    }
+                }
+
+                if (commandLine.equals("messages")) {
+                    System.out.println("To retrieve the last 20 messages posted on the timeline, press enter\n" +
+                            "To retrieve the last twenty messages sent to you enter your github id");
+                    specificCommand = console.readLine();
+                    if(specificCommand.equals("\n")) {
+                        //Jackson stuff
+                        String results = webber.get_messages();
+                        SimpleShell.prettyPrint(results);
+                        continue;
+                    } else {
+                        commandList.add(specificCommand);
+                        //Jackson stuff
+                        String results = webber.get_messages();
+                        SimpleShell.prettyPrint(results);
+                    }
+                }
+
+//pick up here
+                if(commandLine.equalsIgnoreCase("send")){
+
+                    //Jackson stuff
+                    webber.post_message_to_world();
+                }
+
+                //print history, moved it here so full commands will be in history
+                userInputHistory.addAll(commandList);
+                if (commandLine.equalsIgnoreCase("history")) {
+                    for (String s : userInputHistory)
                         System.out.println((index++) + " " + s);
                     continue;
                 }
 
-                // Specific Commands.
 
-                // ids
-                if (list.contains("ids")) {
-                    String results = webber.get_ids();
-                    SimpleShell.prettyPrint(results);
-                    continue;
+                //the !! command returns the last command in userInputHistory
+                if (commandList.get(commandList.size() - 1).equals("!!")) {
+                    processBuilder.command(userInputHistory.get(userInputHistory.size() - 2));
                 }
-
-                // messages
-                if (list.contains("messages")) {
-                    String results = webber.get_messages();
-                    SimpleShell.prettyPrint(results);
-                    continue;
-                }
-                // you need to add a bunch more.
-
-                //!! command returns the last command in history
-                if (list.get(list.size() - 1).equals("!!")) {
-                    pb.command(history.get(history.size() - 2));
-
-                }//!<integer value i> command
-                else if (list.get(list.size() - 1).charAt(0) == '!') {
-                    int b = Character.getNumericValue(list.get(list.size() - 1).charAt(1));
-                    if (b <= history.size())//check if integer entered isn't bigger than history size
-                        pb.command(history.get(b));
+                // !<integer value i> command
+                else if (commandList.get(commandList.size() - 1).charAt(0) == '!') {
+                    int b = Character.getNumericValue(commandList.get(commandList.size() - 1).charAt(1));
+                    if (b <= userInputHistory.size())
+                        processBuilder.command(userInputHistory.get(b));
                 } else {
-                    pb.command(list);
+                    processBuilder.command(commandList);
                 }
 
                 // wait, wait, what curiousness is this?
-                Process process = pb.start();
+                Process process = processBuilder.start();
 
                 //obtain the input stream
                 InputStream is = process.getInputStream();
                 InputStreamReader isr = new InputStreamReader(is);
-                BufferedReader br = new BufferedReader(isr);
+                BufferedReader reader = new BufferedReader(isr);
 
                 //read output of the process
                 String line;
-                while ((line = br.readLine()) != null)
+                while ((line = reader.readLine()) != null)
                     System.out.println(line);
-                br.close();
+                reader.close();
 
 
             }
