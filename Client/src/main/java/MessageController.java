@@ -1,4 +1,5 @@
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,41 +11,64 @@ public class MessageController implements MessageInterface {
 
 
     @Override
-    public String get_messages(ArrayList<String> list) throws com.fasterxml.jackson.core.JsonProcessingException {
+    public String get_messages(ArrayList<String> list) throws JsonProcessingException {
+        String payload = "";
         Message message = new Message("-", "","","");
-        String payload = objectMapper.writeValueAsString(message);
+        try {
+            payload = objectMapper.writeValueAsString(message);
+        } catch(JsonProcessingException e){
+            e.printStackTrace();
+        }
         return youAreEll.makeURLCall("/messages", "GET", payload);
     }
 
     @Override
-    public String get_from_friend(ArrayList<String> list) throws com.fasterxml.jackson.core.JsonProcessingException  {
+    public String get_from_friend(ArrayList<String> list) throws JsonProcessingException  {
+//         /ids/:mygithubid/from/:friendgithubid
         return null;
     }
 
     @Override
-    public String get_my_messages(ArrayList<String> list)throws com.fasterxml.jackson.core.JsonProcessingException  {
+    public String get_my_messages(ArrayList<String> list) {
+       String payload = "";
         String me = list.get(1);
-        Message message = new Message("-", me,"","");
-        String payload = objectMapper.writeValueAsString(message);
-        return youAreEll.makeURLCall("/messages", "GET", payload);
+        Message message = new Message("-", me, "", "");
+        String url = "/ids/:" + me + "/messages";
+        try {
+            payload = objectMapper.writeValueAsString(message);
+        } catch(JsonProcessingException e){
+            e.printStackTrace();
+        }
+        return youAreEll.makeURLCall(url, "GET", payload);
     }
 
     @Override
-    public String post_world(ArrayList<String> list) throws com.fasterxml.jackson.core.JsonProcessingException  {
+    public String post_world(ArrayList<String> list){
+        String payload = "";
         String mess = list.get(1);
         String me = list.get(2);
-        Message message = new Message("",me, "", mess);
-        String payload = objectMapper.writeValueAsString(message);
-        return youAreEll.makeURLCall("/messages","POST", payload);
+        Message message = new Message("-", me, "", mess);
+        String url = "/ids/:" + me + "/messages";
+        try {
+            payload = objectMapper.writeValueAsString(message);
+        } catch (com.fasterxml.jackson.core.JsonProcessingException e){
+            e.printStackTrace();
+        }
+        return youAreEll.makeURLCall(url, "POST", payload);
     }
 
     @Override
-    public String post_friend(ArrayList<String> list) throws com.fasterxml.jackson.core.JsonProcessingException  {
+    public String post_friend(ArrayList<String> list) {
         String mess = list.get(1);
         String me = list.get(2);
         String friend = list.get(3);
-        Message message = new Message("", me, friend, mess);
-        String payload = objectMapper.writeValueAsString(message);
+        String payload = "";
+        Message message = new Message("-", me, friend, mess);
+        try {
+            payload = objectMapper.writeValueAsString(message);
+        } catch(JsonProcessingException e){
+            e.printStackTrace();
+        }
         return youAreEll.makeURLCall("/messages","POST", payload);
     }
 }
