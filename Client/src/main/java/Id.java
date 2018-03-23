@@ -2,26 +2,26 @@
 
 public class Id {
 
-    private String id;
+    private String userid;
     private String name;
     private String github;
 
     public Id(){
     }
 
-    public Id(String id, String name, String github){
-        this.id = id;
+    public Id(String userid, String name, String github){
+        this.userid = userid;
         this.name = name;
         this.github = github;
     }
 
 
     public void setId(String id) {
-        this.id = id;
+        this.userid = id;
     }
 
-    public String getId() {
-        return id;
+    public String getuserid() {
+        return userid;
     }
 
     public void setName(String name) {
@@ -42,7 +42,7 @@ public class Id {
 
     @Override
     public String toString(){
-        return "id: " + getId() + ", name: " + getName() + ", github: " + getGithub();
+        return "userid: " + getuserid() + ", name: " + getName() + ", github: " + getGithub();
     }
 
 }

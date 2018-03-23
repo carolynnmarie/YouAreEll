@@ -53,6 +53,7 @@ public class SimpleShell {
                     String results = "";
                     System.out.println("To retrieve all registered github ids, press enter\n" +
                             "To register a new id or change the name associated, type your name");
+                    String first = console.readLine();
                     specificCommand = console.readLine();
                     if(specificCommand.equals("")) {
                         results = idCont.get_ids(commandList);
@@ -91,6 +92,7 @@ public class SimpleShell {
                         commandList.add(specificCommand);
                     }
                     System.out.println(("Enter your github id"));
+                    specificCommand = console.readLine();
                     if(!specificCommand.equals("")) {
                         commandList.add(specificCommand);
                         results = mesCont.post_world(commandList);

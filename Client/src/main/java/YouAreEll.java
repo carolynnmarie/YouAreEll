@@ -1,11 +1,15 @@
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.apache.http.client.fluent.*;
 import com.fasterxml.jackson.databind.*;
+import okhttp3.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+
 import java.io.IOException;
-import javax.swing.*;
+
 
 
 public class YouAreEll {
+    private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     YouAreEll() {
     }
@@ -14,9 +18,10 @@ public class YouAreEll {
         YouAreEll urlhandler = new YouAreEll();
         ObjectMapper objectMapper = new ObjectMapper();
         String payload = "";
-        Id id = new Id("-","Carolynn","me");
+        Id id = new Id("-", "Carolynn", "me");
         try {
             payload = objectMapper.writeValueAsString(id);
+            urlhandler.makeURLCall("/ids", "POST", payload);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -24,28 +29,26 @@ public class YouAreEll {
 //        System.out.println(urlhandler.makeURLCall("/messages", "GET", ""));
     }
 
-    public String makeURLCall(String mainurl, String method, String jpayload) {
-        String fullUrl = "http://zipcode.rocks:8085" + mainurl;
-        String requestReturn = "";
-//        if(mainurl.equalsIgnoreCase("/ids") && method.equalsIgnoreCase("get")){
-//            try {
-//                requestReturn = Request.Get(fullUrl).execute().returnContent().asString();
-//
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        if(mainurl.equalsIgnoreCase("/ids") && method.equalsIgnoreCase("post")){
-//            requestReturn = Request.Post(jpayload).toString();
-//        }
-//        if(mainurl.equalsIgnoreCase("/messages")){
-//            try {
-//                Request.Get(fullUrl).execute().returnContent();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-        return requestReturn;
-    }
 
+    public String makeURLCall(String mainurl, String method, String jpayload) {
+        OkHttpClient okHttpClient = new OkHttpClient();
+        String fullUrl = "http://zipcode.rocks:8085" + mainurl;
+        Request request = null;
+        if (method.equalsIgnoreCase("get")) {
+            request = new Request.Builder().url(fullUrl).build();
+        }
+        if (method.equalsIgnoreCase("post")) {
+            RequestBody requestBody = RequestBody.create(JSON, jpayload);
+            request = new Request.Builder().url(fullUrl).post(requestBody).build();
+        }
+
+        if (request != null) {
+            try (Response response = okHttpClient.newCall(request).execute()) {
+                return response.body().string();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return "" + method;
+    }
 }
