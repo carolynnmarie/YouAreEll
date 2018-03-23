@@ -49,63 +49,64 @@ public class SimpleShell {
                 MessageController mesCont = new MessageController();
                 IdController idCont = new IdController();
 
-
                 if (commandLine.equalsIgnoreCase("ids")) {
-                    System.out.println("To retrieve all registered github ids, press enter\nTo register a new id " +
-                            "or change the name associated, type the name followed by the github id");
+                    String results = "";
+                    System.out.println("To retrieve all registered github ids, press enter\n" +
+                            "To register a new id or change the name associated, type your name");
                     specificCommand = console.readLine();
-                    if(specificCommand.equals("\n")) {
-                        String results = idCont.get_ids(commandList);
-                        SimpleShell.prettyPrint(results);
-                        continue;
+                    if(specificCommand.equals("")) {
+                        results = idCont.get_ids(commandList);
                     } else {
-                        String [] c = specificCommand.split(" ");
-                        commandList.addAll(Arrays.asList(c));
-                        String save = idCont.saveId(commandList);
-                        SimpleShell.prettyPrint(save);
+                        commandList.add(specificCommand);
+                        System.out.println("Please enter your github id");
+                        specificCommand = console.readLine();
+                        commandList.add(specificCommand);
+                        results = idCont.saveId(commandList);
                     }
+                    SimpleShell.prettyPrint(results);
+                    continue;
                 }
 
                 if (commandLine.equals("messages")) {
+                    String results = "";
                     System.out.println("To retrieve the last 20 messages posted on the timeline, press enter\n" +
                             "To retrieve the last twenty messages sent to you enter your github id");
                     specificCommand = console.readLine();
-                    if(specificCommand.equals("\n")) {
-                        String results = mesCont.get_messages(commandList);
-                        SimpleShell.prettyPrint(results);
-                        continue;
+                    if(specificCommand.equals("\n") || specificCommand.equals("")) {
+                        results = mesCont.get_messages(commandList);
                     } else {
                         commandList.add(specificCommand);
-                        String results = mesCont.get_my_messages(commandList);
-                        SimpleShell.prettyPrint(results);
+                        results = mesCont.get_my_messages(commandList);
                     }
+                    SimpleShell.prettyPrint(results);
+                    continue;
                 }
 
 
                 if(commandLine.equalsIgnoreCase("send")){
-                    System.out.println("To send a message on the timeline type in 'your message' and your github id.\n" +
-                            "To send a message to a friend, type 'your message', within single quotes, followed by your github id and then the");
+                    String results = "";
+                    System.out.println("Please enter your message");
                     specificCommand = console.readLine();
-                    Pattern pattern = Pattern.compile("'.+'");
-                    Matcher matcher = pattern.matcher(specificCommand);
-                    if(matcher.find()){
-                        String one = matcher.group();
-                        String two = specificCommand.substring(matcher.end());
-                        String[] twoSplit = two.split(" ");
-                        commandList.add(one);
-                        if(twoSplit.length == 1){
-                            commandList.add(twoSplit[0]);
-                            String results = mesCont.post_world(commandList);
-                            SimpleShell.prettyPrint(results);
-                        }
-                        if(twoSplit.length == 2){
-                            commandList.add(twoSplit[0]);
-                            commandList.add(twoSplit[1]);
-                            String results = mesCont.post_friend(commandList);
-                            SimpleShell.prettyPrint(results);
-                        }
+                    if(!specificCommand.equals("")) {
+                        commandList.add(specificCommand);
                     }
-                }
+                    System.out.println(("Enter your github id"));
+                    if(!specificCommand.equals("")) {
+                        commandList.add(specificCommand);
+                        results = mesCont.post_world(commandList);
+                    }
+                    System.out.println(("If you wish to send your message to another github user, enter their github id." +
+                            "If you wish to send a general message to the timeline, press enter"));
+                    if (specificCommand.equals("")) {
+                        results = mesCont.post_world(commandList);
+                    }
+                    if(!specificCommand.equals("")) {
+                        commandList.add(specificCommand);
+                        results = mesCont.post_friend(commandList);
+                    }
+                    SimpleShell.prettyPrint(results);
+                    continue;
+                    }
 
 
                 //print history, moved it here so full commands will be in history
