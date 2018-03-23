@@ -3,20 +3,35 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import java.util.Map;
+
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class SimpleShell {
 
-
+//need to deserialize
     public static void prettyPrint(String output) {
-        System.out.println(output);
+        ObjectMapper objectMapper = new ObjectMapper();
+        LinkedHashMap<String,String> map = new LinkedHashMap<>();
+        StringBuilder builder = new StringBuilder();
+        try {
+             map = objectMapper.readValue(output, new TypeReference<Map<String, Object>>(){});
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        for(Map.Entry<String,String> entry: map.entrySet()){
+            builder.append(entry.getKey()).append(" : ").append(entry.getValue()).append("\n");
+        }
+        System.out.println(builder);
     }
+
+//    public static void prettyPrintId(String output){
+//
+//        System.out.println(output);
+//    }
     
     public static void main(String[] args) throws java.io.IOException {
 
@@ -26,7 +41,7 @@ public class SimpleShell {
                 (new InputStreamReader(System.in));
 
         ProcessBuilder processBuilder = new ProcessBuilder();
-        List<String> userInputHistory = new ArrayList<String>();
+        List<String> userInputHistory = new ArrayList<>();
         int index = 0;
 
         //we break out with <ctrl c>
@@ -53,7 +68,6 @@ public class SimpleShell {
                     String results = "";
                     System.out.println("To retrieve all registered github ids, press enter\n" +
                             "To register a new id or change the name associated, type your name");
-                    String first = console.readLine();
                     specificCommand = console.readLine();
                     if(specificCommand.equals("")) {
                         results = idCont.get_ids(commandList);
@@ -65,7 +79,13 @@ public class SimpleShell {
                         results = idCont.saveId(commandList);
                     }
                     SimpleShell.prettyPrint(results);
-                    continue;
+                    System.out.println("To enter another command, press enter.  To exit, type exit.");
+                    commandLine = console.readLine();
+                    if (commandLine.equals("")) continue;
+                    if (commandLine.equals("exit")) {
+                        System.out.println("Goodbye");
+                        break;
+                    }
                 }
 
                 if (commandLine.equals("messages")) {
@@ -80,7 +100,13 @@ public class SimpleShell {
                         results = mesCont.get_my_messages(commandList);
                     }
                     SimpleShell.prettyPrint(results);
-                    continue;
+                    System.out.println("To enter another command, press enter.  To exit, type exit.");
+                    commandLine = console.readLine();
+                    if (commandLine.equals("")) continue;
+                    if (commandLine.equals("exit")) {
+                        System.out.println("Goodbye");
+                        break;
+                    }
                 }
 
 
@@ -107,8 +133,14 @@ public class SimpleShell {
                         results = mesCont.post_friend(commandList);
                     }
                     SimpleShell.prettyPrint(results);
-                    continue;
+                    System.out.println("To enter another command, press enter.  To exit, type exit.");
+                    commandLine = console.readLine();
+                    if (commandLine.equals("")) continue;
+                    if (commandLine.equals("exit")) {
+                        System.out.println("Goodbye");
+                        break;
                     }
+                }
 
 
                 //print history, moved it here so full commands will be in history
