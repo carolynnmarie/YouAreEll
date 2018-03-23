@@ -12,26 +12,41 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class SimpleShell {
 
-//need to deserialize
-    public static void prettyPrint(String output) {
+
+    public static void prettyPrintId(String output) {
         ObjectMapper objectMapper = new ObjectMapper();
-        LinkedHashMap<String,String> map = new LinkedHashMap<>();
-        StringBuilder builder = new StringBuilder();
+        String result = "";
+        Id[] users = null;
         try {
-             map = objectMapper.readValue(output, new TypeReference<Map<String, Object>>(){});
+             users= objectMapper.readValue(output, Id[].class);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        for(Map.Entry<String,String> entry: map.entrySet()){
-            builder.append(entry.getKey()).append(" : ").append(entry.getValue()).append("\n");
+        for(Id user: users){
+            result += "name: " + user.getName() + ", github: " + user.getGithub() + "\n";
         }
-        System.out.println(builder);
+        System.out.println(result);
     }
 
-//    public static void prettyPrintId(String output){
-//
-//        System.out.println(output);
-//    }
+    public static void prettyPrintMessage(String output){
+        ObjectMapper objectMapper = new ObjectMapper();
+        String result = "";
+        Message[] messages = null;
+        try {
+            messages = objectMapper.readValue(output, Message[].class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        for(Message mess: messages){
+            if(mess.getToid().equals("")) {
+                result += "from: " + mess.getFromid() + ", message: " + mess.getMessage() + "\n";
+            }
+            if(!mess.getToid().equals("")) {
+                result += "from: " + mess.getFromid() + ", to: " + mess.getToid() + ", message: " + mess.getMessage() + "\n";
+            }
+        }
+        System.out.println(result);
+    }
     
     public static void main(String[] args) throws java.io.IOException {
 
@@ -78,7 +93,7 @@ public class SimpleShell {
                         commandList.add(specificCommand);
                         results = idCont.saveId(commandList);
                     }
-                    SimpleShell.prettyPrint(results);
+                    SimpleShell.prettyPrintId(results);
                     System.out.println("To enter another command, press enter.  To exit, type exit.");
                     commandLine = console.readLine();
                     if (commandLine.equals("")) continue;
@@ -99,7 +114,7 @@ public class SimpleShell {
                         commandList.add(specificCommand);
                         results = mesCont.get_my_messages(commandList);
                     }
-                    SimpleShell.prettyPrint(results);
+                    SimpleShell.prettyPrintMessage(results);
                     System.out.println("To enter another command, press enter.  To exit, type exit.");
                     commandLine = console.readLine();
                     if (commandLine.equals("")) continue;
@@ -132,7 +147,7 @@ public class SimpleShell {
                         commandList.add(specificCommand);
                         results = mesCont.post_friend(commandList);
                     }
-                    SimpleShell.prettyPrint(results);
+                    SimpleShell.prettyPrintMessage(results);
                     System.out.println("To enter another command, press enter.  To exit, type exit.");
                     commandLine = console.readLine();
                     if (commandLine.equals("")) continue;

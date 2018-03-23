@@ -25,7 +25,7 @@ public class YouAreEll {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        System.out.println(urlhandler.makeURLCall("/ids", "POST", payload));
+//        System.out.println(urlhandler.makeURLCall("/ids", "POST", payload));
 //        System.out.println(urlhandler.makeURLCall("/messages", "GET", ""));
     }
 
