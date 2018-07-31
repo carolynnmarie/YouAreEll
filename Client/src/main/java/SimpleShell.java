@@ -11,7 +11,7 @@ public class SimpleShell {
 
     public static void prettyPrintId(String output) {
         ObjectMapper objectMapper = new ObjectMapper();
-        String result = "";
+        StringBuilder result = new StringBuilder();
         Id[] users = null;
         try {
              users= objectMapper.readValue(output, Id[].class);
@@ -19,14 +19,19 @@ public class SimpleShell {
             e.printStackTrace();
         }
         for(Id user: users){
-            result += "name: " + user.getName() + ", github: " + user.getGithub() + "\n";
+            result.append("name: ")
+                    .append(user.getName())
+                    .append(", github: ")
+                    .append(user.getGithub())
+                    .append("\n");
         }
-        System.out.println(result);
+        System.out.println(result.toString());
     }
 
     public static void prettyPrintMessage(String output){
         ObjectMapper objectMapper = new ObjectMapper();
-        String result = "";
+        StringBuilder result = new StringBuilder();
+
         Message[] messages = null;
         try {
             messages = objectMapper.readValue(output, Message[].class);
@@ -35,18 +40,39 @@ public class SimpleShell {
         }
         for(Message mess: messages){
             if(mess.getToid().equals("")) {
-                result += "from: " + mess.getFromid() + ", message: " + mess.getMessage() + "\n";
-            }
-            if(!mess.getToid().equals("")) {
-                result += "from: " + mess.getFromid() + ", to: " + mess.getToid() + ", message: " + mess.getMessage() + "\n";
+                result.append("from: ")
+                        .append(mess.getFromid())
+                        .append(", message: ")
+                        .append(mess.getMessage())
+                        .append("\n");
+            } else {
+                result.append("from: ")
+                        .append(mess.getFromid())
+                        .append(" to: ")
+                        .append(mess.getToid())
+                        .append(", message: ")
+                        .append(mess.getMessage())
+                        .append("\n");
             }
         }
-        System.out.println(result);
+        System.out.println(result.toString());
+    }
+
+    public static boolean nextCommand()throws java.io.IOException{
+        String commandLine;
+        BufferedReader console = new BufferedReader
+                (new InputStreamReader(System.in));
+        System.out.println("To enter another command, press enter.  To exit, type exit.");
+        commandLine = console.readLine();
+        if (commandLine.equals("")) return true;
+        if (commandLine.equals("exit")) {
+            System.out.println("Goodbye");
+        }
+        return false;
     }
     
     public static void main(String[] args) throws java.io.IOException {
 
-        YouAreEll webber = new YouAreEll();
         String commandLine;
         BufferedReader console = new BufferedReader
                 (new InputStreamReader(System.in));
@@ -54,20 +80,21 @@ public class SimpleShell {
         ProcessBuilder processBuilder = new ProcessBuilder();
         List<String> userInputHistory = new ArrayList<>();
         int index = 0;
+        boolean next = true;
 
         //we break out with <ctrl c>
-        while (true) {
+        while (next) {
             System.out.println("To receive all registered github ids, register a new id, or change the associated name, type 'ids'.\n" +
                     "To get messages, type 'messages'. \nTo send a message, type 'send'.\n" +
                     "To receive a history of previous commands, type 'history'.\n" +
                     "To exit, type exit. ");
             commandLine = console.readLine();
-            if (commandLine.equals("")) continue;
+            if (commandLine.equals("")) next = true;
             if (commandLine.equals("exit")) {
                 System.out.println("Goodbye");
-                break;
+                next = false;
             }
-
+            String results = "";
             try {
                 String specificCommand = "";
                 ArrayList<String> commandList = new ArrayList<>();
@@ -76,7 +103,6 @@ public class SimpleShell {
                 IdController idCont = new IdController();
 
                 if (commandLine.equalsIgnoreCase("ids")) {
-                    String results = "";
                     System.out.println("To retrieve all registered github ids, press enter\n" +
                             "To register a new id or change the name associated, type your name");
                     specificCommand = console.readLine();
@@ -90,17 +116,9 @@ public class SimpleShell {
                         results = idCont.saveId(commandList);
                     }
                     SimpleShell.prettyPrintId(results);
-                    System.out.println("To enter another command, press enter.  To exit, type exit.");
-                    commandLine = console.readLine();
-                    if (commandLine.equals("")) continue;
-                    if (commandLine.equals("exit")) {
-                        System.out.println("Goodbye");
-                        break;
-                    }
-                }
+                    next = SimpleShell.nextCommand();
 
-                if (commandLine.equals("messages")) {
-                    String results = "";
+                } else if (commandLine.equals("messages")) {
                     System.out.println("To retrieve the last 20 messages posted on the timeline, press enter\n" +
                             "To retrieve the last twenty messages sent to you enter your github id");
                     specificCommand = console.readLine();
@@ -111,18 +129,9 @@ public class SimpleShell {
                         results = mesCont.get_my_messages(commandList);
                     }
                     SimpleShell.prettyPrintMessage(results);
-                    System.out.println("To enter another command, press enter.  To exit, type exit.");
-                    commandLine = console.readLine();
-                    if (commandLine.equals("")) continue;
-                    if (commandLine.equals("exit")) {
-                        System.out.println("Goodbye");
-                        break;
-                    }
-                }
+                    next = SimpleShell.nextCommand();
 
-
-                if(commandLine.equalsIgnoreCase("send")){
-                    String results = "";
+                } else if(commandLine.equalsIgnoreCase("send")){
                     System.out.println("Please enter your message");
                     specificCommand = console.readLine();
                     if(!specificCommand.equals("")) {
@@ -136,21 +145,15 @@ public class SimpleShell {
                     }
                     System.out.println(("If you wish to send your message to another github user, enter their github id." +
                             "If you wish to send a general message to the timeline, press enter"));
+                    specificCommand = console.readLine();
                     if (specificCommand.equals("")) {
                         results = mesCont.post_world(commandList);
-                    }
-                    if(!specificCommand.equals("")) {
+                    } else if(!specificCommand.equals("")) {
                         commandList.add(specificCommand);
                         results = mesCont.post_friend(commandList);
                     }
                     SimpleShell.prettyPrintMessage(results);
-                    System.out.println("To enter another command, press enter.  To exit, type exit.");
-                    commandLine = console.readLine();
-                    if (commandLine.equals("")) continue;
-                    if (commandLine.equals("exit")) {
-                        System.out.println("Goodbye");
-                        break;
-                    }
+                    next = SimpleShell.nextCommand();
                 }
 
 
@@ -161,7 +164,6 @@ public class SimpleShell {
                         System.out.println((index++) + " " + s);
                     continue;
                 }
-
 
                 //the !! command returns the last command in userInputHistory
                 if (commandList.get(commandList.size() - 1).equals("!!")) {
@@ -175,7 +177,6 @@ public class SimpleShell {
                 } else {
                     processBuilder.command(commandList);
                 }
-
                 // wait, wait, what curiousness is this?
                 Process process = processBuilder.start();
 
@@ -189,7 +190,6 @@ public class SimpleShell {
                 while ((line = reader.readLine()) != null)
                     System.out.println(line);
                 reader.close();
-
 
             }
 

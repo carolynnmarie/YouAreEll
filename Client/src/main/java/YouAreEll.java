@@ -25,8 +25,6 @@ public class YouAreEll {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-//        System.out.println(urlhandler.makeURLCall("/ids", "POST", payload));
-//        System.out.println(urlhandler.makeURLCall("/messages", "GET", ""));
     }
 
 
@@ -36,8 +34,7 @@ public class YouAreEll {
         Request request = null;
         if (method.equalsIgnoreCase("get")) {
             request = new Request.Builder().url(fullUrl).build();
-        }
-        if (method.equalsIgnoreCase("post")) {
+        } else if (method.equalsIgnoreCase("post")) {
             RequestBody requestBody = RequestBody.create(JSON, jpayload);
             request = new Request.Builder().url(fullUrl).post(requestBody).build();
         }

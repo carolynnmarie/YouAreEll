@@ -11,7 +11,7 @@ public class MessageController implements MessageInterface {
 
 
     @Override
-    public String get_messages(ArrayList<String> list) throws JsonProcessingException {
+    public String get_messages(ArrayList<String> list)  {
         String payload = "";
         Message message = new Message("-", "","","");
         try {
@@ -23,7 +23,7 @@ public class MessageController implements MessageInterface {
     }
 
     @Override
-    public String get_from_friend(ArrayList<String> list) throws JsonProcessingException  {
+    public String get_from_friend(ArrayList<String> list) {
 //         /ids/:mygithubid/from/:friendgithubid
         return null;
     }
@@ -44,9 +44,10 @@ public class MessageController implements MessageInterface {
 
     @Override
     public String post_world(ArrayList<String> list){
-        String payload = "";
+
         String mess = list.get(1);
         String me = list.get(2);
+        String payload = "";
         Message message = new Message("-", me, "", mess);
         String url = "/ids/:" + me + "/messages";
         try {

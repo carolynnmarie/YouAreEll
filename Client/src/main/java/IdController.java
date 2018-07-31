@@ -23,9 +23,4 @@ public class IdController implements IdInterface {
        return youAreEll.makeURLCall("/ids", "POST", payload);
     }
 
-
 }
-//    String me = list.get(1);
-//    Message message = new Message("-", me,"","");
-//    String payload = objectMapper.writeValueAsString(message);
-//        return youAreEll.makeURLCall("/messages", "GET", payload);
